@@ -7,12 +7,14 @@ import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     //width and height of the game screen part
     int gWidth,gHeight;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         initData();
         initView();
+        initListen();
     }
 
     //initialize the data
@@ -49,8 +52,10 @@ public class MainActivity extends AppCompatActivity {
         gHeight = gWidth * 2;
         //initialize the map 10 * 20
         maps = new boolean [10][20];
-        //initialize the box
-        boxes = new Point[]{new Point(3,0), new Point(3,1), new Point(4,1), new Point(5,1)};
+        /*initialize the box
+        the first point is the center point
+         */
+        boxes = new Point[]{new Point(3,1), new Point(3,0), new Point(4,1), new Point(5,1)};
         //initialize the box size
         boxSize = gWidth / maps.length;
 
@@ -107,5 +112,122 @@ public class MainActivity extends AppCompatActivity {
         DisplayMetrics outMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(outMetrics);
         return outMetrics.widthPixels;
+    }
+
+    //initialize the listening and add event to the button
+    public void initListen(){
+        findViewById(R.id.btn_left).setOnClickListener(this);
+        findViewById(R.id.btn_right).setOnClickListener(this);
+        findViewById(R.id.btn_rotate).setOnClickListener(this);
+        findViewById(R.id.btn_down).setOnClickListener(this);
+        findViewById(R.id.btn_start).setOnClickListener(this);
+        findViewById(R.id.btn_pause).setOnClickListener(this);
+    }
+
+    //click event
+    @Override
+    public void onClick(View v){
+        switch (v.getId()){
+
+            //left
+            case R.id.btn_left:
+                //Toast.makeText(this,"Clicked Left", Toast.LENGTH_SHORT).show();
+                move(-1,0);    //decrease one unit of the x-axis and keep y-axis unchanged when move it to the left
+                break;
+
+            //right
+            case R.id.btn_right:
+                //Toast.makeText(this,"Clicked Right", Toast.LENGTH_SHORT).show();
+                move(1,0);    //increase one unit of the x-axis and keep y-axis unchanged when move it to the right
+                break;
+
+            //up
+            case R.id.btn_rotate:
+                //Toast.makeText(this,"Clicked Up", Toast.LENGTH_SHORT).show();
+                rotate();
+                break;
+
+            //down
+            case R.id.btn_down:
+                //Toast.makeText(this,"Clicked Down", Toast.LENGTH_SHORT).show();
+                move(0,1);   //increase one unit of the y-axis and keep x-axis unchanged when move it to downwards
+                break;
+
+            //start
+            case R.id.btn_start:
+                //Toast.makeText(this,"Start", Toast.LENGTH_SHORT).show();
+                break;
+
+            //pause
+            case R.id.btn_pause:
+                //Toast.makeText(this,"Paused", Toast.LENGTH_SHORT).show();
+                break;
+
+        }
+
+        // call the method to redraw the view after each move
+        view.invalidate();
+    }
+
+    //move
+    public boolean move(int x, int y){
+        // Log.e("Before: ",boxes[0].x + ":" + boxes[0].y);
+
+        /*check the new x-axis and y-axis whether they are out of the screen
+          if it is true; then return false directly;
+          if all new boxes are not out of bound, then move the boxes to the new position and return true;
+         */
+        for (int i = 0; i < boxes.length; i++){
+            if(outOfBound( boxes[i].x + x, boxes[i].y + y)) {
+                return false;
+            }
+        }
+
+        //iterate the boxes array and add each box with the offset
+        for (int i = 0; i < boxes.length; i++){
+            boxes[i].x += x;
+            boxes[i].y += y;
+        }
+        //Log.e("After: ",boxes[0].x + ":" + boxes[0].y);
+        return true;
+    }
+
+    //rotate
+    public boolean rotate(){
+
+        /*check the new x-axis and y-axis whether they are out of the screen
+          if it is true; then return false directly;
+          if all new boxes are not out of bound, then rotate the boxes and return true;
+         */
+        for (int i = 0; i < boxes.length; i++){
+            if(outOfBound( -boxes[i].y + boxes[0].y + boxes[0].x, boxes[i].x - boxes[0].x + boxes[0].y)) {
+                return false;
+            }
+        }
+
+        //iterate each boxes and make each of them rotate clockwise 90 degrees
+        for(int i = 0; i < boxes.length; i++){
+
+            /* use the Euclidean transformation of rotation in Cartesian coordination */
+            int newX = -boxes[i].y + boxes[0].y + boxes[0].x;
+            int newY = boxes[i].x - boxes[0].x + boxes[0].y;
+            boxes[i].x = newX;
+            boxes[i].y = newY;
+        }
+        return true;
+    }
+
+    /**
+     * check boundary
+     * check whether x and y is out of the bound
+     *@param x   x-axis
+     *@param y   y-axis
+     * @return    true---out of bound;  false---not out of bound
+     */
+    public boolean outOfBound(int x, int y){
+        if(x < 0 || y < 0 || x > maps.length - 1 || y > maps[0].length - 1){
+            return true;
+        }
+        return false;
     }
 }
