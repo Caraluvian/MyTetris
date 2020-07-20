@@ -20,7 +20,32 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"></LinearLayout>
+            android:layout_gravity="bottom"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btn_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/colorPrimary"
+                android:background="@color/yellow"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                />
+            <Button
+                android:id="@+id/btn_pause"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimary"
+                android:background="@color/green"
+                android:text="@string/pause"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -32,33 +57,57 @@
         <Button
             android:id="@+id/btn_left"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Left"
+            android:text="@string/Left"
+            android:textSize="40sp"
+            android:layout_marginStart="10dp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:background="@color/colorPrimaryDark"
              />
 
         <Button
             android:id="@+id/btn_right"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Right"
+            android:layout_marginStart="10dp"
+            android:text="@string/Right"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:background="@color/colorPrimaryDark"
             />
 
         <Button
             android:id="@+id/btn_up"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Up"
+            android:text="@string/Up"
+            android:textSize="40sp"
+            android:layout_marginStart="10dp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:background="@color/colorPrimaryDark"
             />
 
         <Button
             android:id="@+id/btn_down"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Down"
+            android:text="@string/Down"
+            android:textSize="40sp"
+            android:layout_marginStart="10dp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:background="@color/colorPrimaryDark"
             />
 
     </LinearLayout>

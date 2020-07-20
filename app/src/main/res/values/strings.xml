@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MyTetris</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="Left">←</string>
+    <string name="Right">→</string>
+    <string name="Up">↑</string>
+    <string name="Down">↓</string>
 </resources>
