@@ -14,6 +14,8 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import java.util.Random;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     //width and height of the game screen part
@@ -24,10 +26,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     boolean [][] maps;
     //box and box size
     Point[] boxes;
+    int boxType;
     int boxSize;
     //initialize the paint of the auxiliary line
     Paint paintLine;
     Paint boxLine;
+    Paint mapLine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         initData();
+        initBoxes();
         initView();
         initListen();
     }
@@ -52,25 +57,72 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         gHeight = gWidth * 2;
         //initialize the map 10 * 20
         maps = new boolean [10][20];
-        /*initialize the box
-        the first point is the center point
-         */
-        boxes = new Point[]{new Point(3,1), new Point(3,0), new Point(4,1), new Point(5,1)};
+
         //initialize the box size
         boxSize = gWidth / maps.length;
 
+    }
+
+    //new boxes
+    public void initBoxes(){
+
+        // randomly set a new box
+        Random random = new Random();
+        boxType = random.nextInt(7);
+
+        switch (boxType){
+            //square tetromino
+            case 0:
+                boxes = new Point[]{new Point(4,0), new Point(5,0), new Point(4,1), new Point(5,1)};
+                break;
+
+             //L-tetromino type 1
+            case 1:
+                boxes = new Point[]{new Point(3,1), new Point(3,0), new Point(4,1), new Point(5,1)};
+                break;
+
+            //L-tetromino type 2
+            case 2:
+                boxes = new Point[]{new Point(5,1), new Point(5,0), new Point(4,1), new Point(3,1)};
+                break;
+
+            //skew tetromino type 1
+            case 3:
+                boxes = new Point[]{new Point(5,0), new Point(4,0), new Point(5,1), new Point(6,1)};
+                break;
+
+            //skew tetromino type 2
+            case 4:
+                boxes = new Point[]{new Point(5,0), new Point(6,0), new Point(5,1), new Point(4,1)};
+                break;
+
+            //T-tetromin
+            case 5:
+                boxes = new Point[]{new Point(5,0), new Point(4,0), new Point(6,0), new Point(5,1)};
+                break;
+
+            //straight tetromino
+            case 6:
+                boxes = new Point[]{new Point(5,0), new Point(4,0), new Point(6,0), new Point(7,0)};
+                break;
+
+        }
     }
 
     //initialize the view
     public void initView(){
         //initialize the paint
         paintLine = new Paint();
-        paintLine.setColor(0xff666666);
+        paintLine.setColor(getResources().getColor(R.color.green));
         paintLine.setAntiAlias(true);
 
         boxLine = new Paint();
-        boxLine.setColor(0xff000000);
+        boxLine.setColor(getResources().getColor(R.color.light_yellow));
         boxLine.setAntiAlias(true);
+
+        mapLine = new Paint();
+        mapLine.setColor(getResources().getColor(R.color.yellow));
+        mapLine.setAntiAlias(true);
 
         //get the parent container
         FrameLayout gameScreen = findViewById(R.id.gameScreen);
@@ -80,11 +132,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             protected void onDraw(Canvas canvas){
                 super.onDraw(canvas);
+
+                //draw the pile up maps after adding each types of boxes
+                for(int i = 0; i < maps.length; i++){
+                    for(int j  = 0; j < maps[i].length; j++){
+                        if(maps[i][j] == true){
+                            canvas.drawRect(i * boxSize,j * boxSize, i * boxSize + boxSize, j * boxSize + boxSize, mapLine);
+                        }
+                    }
+                }
+
                 //drawing boxes
                 for(int i = 0; i < boxes.length; i++){
                     canvas.drawRect(boxes[i].x * boxSize,boxes[i].y * boxSize,boxes[i].x * boxSize + boxSize,boxes[i].y * boxSize + boxSize,boxLine);
                 }
-
 
                 //drawing map auxiliary line
                 //maps.length = 10, 10 rows (x axis)
@@ -100,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //set the size of the game screen
         view.setLayoutParams(new FrameLayout.LayoutParams(gWidth,gHeight));
         //set background color
-        view.setBackgroundColor(0x10000000);
+        view.setBackgroundColor(getResources().getColor(R.color.greyGreen));
         //add it in parent container
         gameScreen.addView(view);
     }
@@ -120,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_right).setOnClickListener(this);
         findViewById(R.id.btn_rotate).setOnClickListener(this);
         findViewById(R.id.btn_down).setOnClickListener(this);
+        findViewById(R.id.btn_quickDown).setOnClickListener(this);
         findViewById(R.id.btn_start).setOnClickListener(this);
         findViewById(R.id.btn_pause).setOnClickListener(this);
     }
@@ -150,8 +212,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //down
             case R.id.btn_down:
                 //Toast.makeText(this,"Clicked Down", Toast.LENGTH_SHORT).show();
-                move(0,1);   //increase one unit of the y-axis and keep x-axis unchanged when move it to downwards
+                moveDown();
                 break;
+
+            //quick Downwards
+            case R.id.btn_quickDown:
+                while(true){
+                    if(moveDown()){
+                        // if move downwards successfully, then keep go downwards until reach the button
+                    }else{
+                        //if fails,then break directly
+                        break;
+                    }
+                }
 
             //start
             case R.id.btn_start:
@@ -169,6 +242,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         view.invalidate();
     }
 
+    //Move Downwards and fulfill pile up
+    public boolean moveDown(){
+        // moving down
+        if(move(0,1)){      //if moving success, no need to pile up
+            return true;
+        }else{                      //if moving fails, pile up
+            for(int i = 0; i < boxes.length; i++){
+                maps[boxes[i].x][boxes[i].y] = true;
+            }
+        }
+        //After pile up, create new boxes
+        initBoxes();
+        return false;
+    }
     //move
     public boolean move(int x, int y){
         // Log.e("Before: ",boxes[0].x + ":" + boxes[0].y);
@@ -194,6 +281,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //rotate
     public boolean rotate(){
+
+        //if it is square tetromino, there is no need to rotate
+        if(boxType == 0){
+            return false;
+        }
 
         /*check the new x-axis and y-axis whether they are out of the screen
           if it is true; then return false directly;
@@ -225,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @return    true---out of bound;  false---not out of bound
      */
     public boolean outOfBound(int x, int y){
-        if(x < 0 || y < 0 || x > maps.length - 1 || y > maps[0].length - 1){
+        if(x < 0 || y < 0 || x > maps.length - 1 || y > maps[0].length - 1 || maps[x][y] == true){
             return true;
         }
         return false;

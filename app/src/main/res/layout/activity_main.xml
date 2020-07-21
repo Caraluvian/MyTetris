@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lightBlue"
     android:orientation="vertical">
 
     <LinearLayout
@@ -31,7 +32,7 @@
                 android:text="@string/start"
                 android:layout_marginBottom="10dp"
                 android:textColor="@color/colorPrimary"
-                android:background="@color/yellow"
+                android:background="@color/orange"
                 android:textStyle="bold"
                 android:textAlignment="center"
                 />
@@ -89,6 +90,15 @@
             android:layout_marginLeft="40dp"
             android:layout_toRightOf="@id/btn_rotate"
             android:src="@drawable/right" />
+
+        <ImageView
+            android:id="@+id/btn_quickDown"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_above="@id/btn_rotate"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp"
+            android:src="@drawable/quickdown" />
     </RelativeLayout>
 
 </LinearLayout>
