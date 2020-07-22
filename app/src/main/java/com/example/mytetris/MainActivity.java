@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -33,6 +34,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Paint boxLine;
     Paint mapLine;
 
+    //auto move downwards thread
+    public Thread downThread;
+    //pause state
+    public boolean isPause;
+    //over state
+    public boolean isOver;
+
+    public Handler handler = new Handler(){
+        public void handleMessage(android.os.Message msg){
+            view.invalidate();  //update the view
+        };
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         initData();
-        initBoxes();
+        //initBoxes();
         initView();
         initListen();
     }
@@ -60,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //initialize the box size
         boxSize = gWidth / maps.length;
-
+        boxes = new Point[]{};
     }
 
     //new boxes
@@ -194,29 +208,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //left
             case R.id.btn_left:
                 //Toast.makeText(this,"Clicked Left", Toast.LENGTH_SHORT).show();
+                if(isPause || isOver){
+                   return;
+                }
                 move(-1,0);    //decrease one unit of the x-axis and keep y-axis unchanged when move it to the left
                 break;
 
             //right
             case R.id.btn_right:
                 //Toast.makeText(this,"Clicked Right", Toast.LENGTH_SHORT).show();
+                if(isPause || isOver){
+                    return;
+                }
                 move(1,0);    //increase one unit of the x-axis and keep y-axis unchanged when move it to the right
                 break;
 
             //up
             case R.id.btn_rotate:
                 //Toast.makeText(this,"Clicked Up", Toast.LENGTH_SHORT).show();
+                if(isPause || isOver){
+                    return;
+                }
                 rotate();
                 break;
 
             //down
             case R.id.btn_down:
                 //Toast.makeText(this,"Clicked Down", Toast.LENGTH_SHORT).show();
+                if(isPause || isOver){
+                    return;
+                }
                 moveDown();
                 break;
 
             //quick Downwards
             case R.id.btn_quickDown:
+                if(isPause || isOver){
+                    return;
+                }
                 while(true){
                     if(moveDown()){
                         // if move downwards successfully, then keep go downwards until reach the button
@@ -229,17 +258,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //start
             case R.id.btn_start:
                 //Toast.makeText(this,"Start", Toast.LENGTH_SHORT).show();
+                startGame();
                 break;
 
             //pause
             case R.id.btn_pause:
                 //Toast.makeText(this,"Paused", Toast.LENGTH_SHORT).show();
+                setPause();
                 break;
 
         }
 
         // call the method to redraw the view after each move
         view.invalidate();
+    }
+
+    //start
+    public void startGame(){
+        if(downThread == null){
+            downThread = new Thread(){
+                @Override
+                public void run(){
+                    super.run();
+                    while(true){
+                        //move downwards for each 500ms
+                        try{
+                            sleep(500);
+                        }catch (InterruptedException e){
+                            e.printStackTrace();
+                        }
+                        //check the pause state and end state
+                        if(isPause || isOver){
+                            continue; //continue looping without moving downwards
+                        }
+
+                        //move downwards
+                        moveDown();
+                        //notify the main thread to update the view
+                        handler.sendEmptyMessage(0);
+                    }
+                }
+            };
+            downThread.start();
+        }
+        initBoxes();
+    }
+
+    //set pause state
+    public void setPause(){
+        if(isPause){
+            isPause = false;
+        }else{
+            isPause = true;
+        }
     }
 
     //Move Downwards and fulfill pile up
@@ -254,8 +325,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //After pile up, create new boxes
         initBoxes();
+        isOver = gameOver();
         return false;
     }
+
+    //check whether game over
+    public boolean gameOver(){
+        for(int i = 0; i < boxes.length; i++){
+            if(maps[boxes[i].x][boxes[i].y]){  //which means two boxes have overlapped
+                return true;
+            }
+        }
+        return false;   //no overlap,continue the game
+    }
+
     //move
     public boolean move(int x, int y){
         // Log.e("Before: ",boxes[0].x + ":" + boxes[0].y);
