@@ -397,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             canClear = checkEliminate(y);
             if(canClear){
                 deleteLine(y);
-                y++;
+                y++;  //recheck the lines as the previous line has been deleted.
             }
         }
     }
