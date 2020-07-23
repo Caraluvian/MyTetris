@@ -1,3 +1,12 @@
+/*
+   SEG2105
+   Final Project
+
+   Author: Cara Yuejia Li
+   Date : 2020.07.22
+
+ */
+
 package com.example.mytetris;
 
 import android.content.Context;
@@ -17,6 +26,8 @@ import android.widget.Toast;
 
 import java.util.Random;
 
+import static android.os.SystemClock.sleep;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     //width and height of the game screen part
@@ -33,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Paint paintLine;
     Paint boxLine;
     Paint mapLine;
+    Paint pauseAlert;
 
     //auto move downwards thread
     public Thread downThread;
@@ -138,6 +150,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mapLine.setColor(getResources().getColor(R.color.yellow));
         mapLine.setAntiAlias(true);
 
+        pauseAlert = new Paint();
+        pauseAlert.setColor(getResources().getColor(R.color.red));
+        pauseAlert.setAntiAlias(true);
+        pauseAlert.setTextSize(80);
+
         //get the parent container
         FrameLayout gameScreen = findViewById(R.id.gameScreen);
         //instantiate the game part
@@ -170,6 +187,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 for(int j = 0; j < maps[0].length; j++){
                     canvas.drawLine(0, j * boxSize, view.getWidth(), j * boxSize, paintLine);
                 }
+
+                //show the game is over
+                if(isOver){
+                    canvas.drawText("Game Over",view.getWidth() * 1/2 - pauseAlert.measureText("Paused") * 1/2 , gHeight * 1/2, pauseAlert);
+                }
+
+                //show the Pause alert
+                if(isPause && !isOver){
+                    canvas.drawText("Paused",view.getWidth() * 1/2 - pauseAlert.measureText("Paused") * 1/2 , gHeight * 1/2, pauseAlert);
+                }
+
             }
         };
         //set the size of the game screen
@@ -207,7 +235,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             //left
             case R.id.btn_left:
-                //Toast.makeText(this,"Clicked Left", Toast.LENGTH_SHORT).show();
+
+                if(boxes == null){
+                    return;
+                }
+
                 if(isPause || isOver){
                    return;
                 }
@@ -216,7 +248,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             //right
             case R.id.btn_right:
-                //Toast.makeText(this,"Clicked Right", Toast.LENGTH_SHORT).show();
+
+                if(boxes == null){
+                    return;
+                }
+
                 if(isPause || isOver){
                     return;
                 }
@@ -225,7 +261,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             //up
             case R.id.btn_rotate:
-                //Toast.makeText(this,"Clicked Up", Toast.LENGTH_SHORT).show();
+
+                if(boxes == null){
+                    return;
+                }
+
                 if(isPause || isOver){
                     return;
                 }
@@ -234,7 +274,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             //down
             case R.id.btn_down:
-                //Toast.makeText(this,"Clicked Down", Toast.LENGTH_SHORT).show();
+
+                if(boxes == null){
+                    return;
+                }
+
                 if(isPause || isOver){
                     return;
                 }
@@ -243,6 +287,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             //quick Downwards
             case R.id.btn_quickDown:
+
+                if(boxes == null){
+                    return;
+                }
+
                 if(isPause || isOver){
                     return;
                 }
@@ -254,16 +303,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         break;
                     }
                 }
+                break;
 
             //start
             case R.id.btn_start:
-                //Toast.makeText(this,"Start", Toast.LENGTH_SHORT).show();
+
                 startGame();
                 break;
 
             //pause
             case R.id.btn_pause:
-                //Toast.makeText(this,"Paused", Toast.LENGTH_SHORT).show();
+
+                if(boxes == null){
+                    return;
+                }
+
                 setPause();
                 break;
 
@@ -275,7 +329,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //start
     public void startGame(){
+
         if(downThread == null){
+
             downThread = new Thread(){
                 @Override
                 public void run(){
@@ -301,6 +357,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             };
             downThread.start();
         }
+        //clear the map once the start button has been touched
+        for (int x = 0; x < maps.length; x++){
+            for (int y = 0; y < maps[x].length; y++){
+                maps[x][y] = false;
+            }
+        }
+        isOver = false;
+        isPause = false;
         initBoxes();
     }
 
@@ -323,10 +387,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 maps[boxes[i].x][boxes[i].y] = true;
             }
         }
+
+        eliminate();
+
         //After pile up, create new boxes
         initBoxes();
         isOver = gameOver();
         return false;
+    }
+
+    //eliminate those lines full of boxes
+    public void eliminate(){
+        boolean canClear;
+        //iterate cheking from buttom to the top
+        for(int y = maps[0].length - 1; y > 0 ; y--){
+            canClear = checkEliminate(y);
+            if(canClear){
+                deleteLine(y);
+                y++;
+            }
+        }
+    }
+
+    //check whether need to eliminate
+    public boolean checkEliminate(int y){
+        for (int x = 0; x < maps.length; x++){
+            //if all boxes in any line are true, then eliminiate them
+            if(!maps[x][y]){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //execute the elimination
+    public void deleteLine(int dy){
+        for(int y = dy; y > 0 ; y--){
+            for (int x = 0; x < maps.length; x++) {
+                maps[x][y] = maps[x][y-1];    //x-axis unchanged and decrease one unit of each line
+            }
+        }
     }
 
     //check whether game over
