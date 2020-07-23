@@ -25,6 +25,10 @@ The important method is the startGame(), which randomly initialize the tetromino
 Another critical parts are the three method to eliminate the completed lines. Once all small boxes of any lines filled, clear it. 
 Also recheck the line after the previous line has been deleted. (check the lines from button to top)
 
+Test diagramhs:
+
+![](https://github.com/Caraluvian/MyTetris/raw/test/finaltest.png)
+
 Hints to add more feature:
 
 * You can add the feature to score the game;
