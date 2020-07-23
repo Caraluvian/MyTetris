@@ -25,10 +25,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //width and height of the game screen part
     int gWidth,gHeight;
+
     //game screen controls
     View view;
+
     //map
     boolean [][] maps;
+
     //box and box size
     Point[] boxes;
     int boxType;
