@@ -1,10 +1,7 @@
 /*
-   SEG2105
-   Final Project
-
+   SEG2105 Final Project
    Author: Cara Yuejia Li
    Date : 2020.07.22
-
  */
 
 package com.example.mytetris;
@@ -17,13 +14,9 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.Toast;
-
 import java.util.Random;
 
 import static android.os.SystemClock.sleep;
