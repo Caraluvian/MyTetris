@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 boxes = new Point[]{new Point(5,0), new Point(6,0), new Point(5,1), new Point(4,1)};
                 break;
 
-            //T-tetromin
+            //T-tetromino
             case 5:
                 boxes = new Point[]{new Point(5,0), new Point(4,0), new Point(6,0), new Point(5,1)};
                 break;
@@ -392,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //eliminate those lines full of boxes
     public void eliminate(){
         boolean canClear;
-        //iterate cheking from buttom to the top
+        //iterate checking from button to the top
         for(int y = maps[0].length - 1; y > 0 ; y--){
             canClear = checkEliminate(y);
             if(canClear){
@@ -405,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //check whether need to eliminate
     public boolean checkEliminate(int y){
         for (int x = 0; x < maps.length; x++){
-            //if all boxes in any line are true, then eliminiate them
+            //if all boxes in any line are true, then eliminate them
             if(!maps[x][y]){
                 return false;
             }
